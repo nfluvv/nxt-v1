@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { auth } from "@/auth"
 import { prisma } from "@/shared/server/db/prisma"
-import { verifyTonSignature } from "@/shared/server/auth/crypto"
+import { verifyTonProof } from "@/shared/server/auth/crypto"
 
 type LinkResult = { success: true } | { success: false; error: string }
 
@@ -30,7 +30,7 @@ export const linkTonWallet = async (
     }
   }
 
-  const isValid = await verifyTonSignature(address, signature, nonce, publicKey)
+  const isValid = await verifyTonProof(address, signature, nonce)
   if (!isValid) {
     return { success: false, error: "Wrong signature" }
   }
