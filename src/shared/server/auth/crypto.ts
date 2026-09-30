@@ -1,12 +1,9 @@
-import { signVerify, keyPairFromSecretKey, mnemonicToPrivateKey } from "@ton/crypto"
+import { signVerify, sha256 } from "@ton/crypto"
 import { Address } from "@ton/core"
 
 interface TonProof {
   timestamp: number
-  domain: {
-    lengthBytes: number
-    value: string
-  }
+  domain: { lengthBytes: number; value: string }
   payload: string
   signature: string
 }
@@ -19,74 +16,49 @@ export async function verifyTonProof(
   try {
     const proof: TonProof = JSON.parse(proofJson)
     const addr = Address.parse(address)
-
+    
     const cleanPublicKey = publicKey.replace(/^0x/, "")
     const publicKeyBuffer = Buffer.from(cleanPublicKey, "hex")
 
-    if (publicKeyBuffer.length !== 32) {
-      console.error(`Неверная длина публичного ключа: ${publicKeyBuffer.length}`)
-      return false
-    }
+    if (publicKeyBuffer.length !== 32) return false
 
     const now = Math.floor(Date.now() / 1000)
-    if (Math.abs(now - proof.timestamp) > 300) {
-      console.error(`Proof слишком старый: ${proof.timestamp}`)
-      return false
-    }
+    if (Math.abs(now - proof.timestamp) > 300) return false
 
-    const TON_PROOF_PREFIX = "ton-proof-item-v2/"
-    const prefixBuffer = Buffer.from(TON_PROOF_PREFIX, "utf-8")
+    const prefix = Buffer.from("ton-proof-item-v2/")
 
-    const addressBuffer = Buffer.alloc(36)
-    addressBuffer.writeInt32BE(addr.workChain, 0)
-    addr.hash.copy(addressBuffer, 4, 0, 32)
+    const addrBuffer = Buffer.alloc(36)
+    addrBuffer.writeInt32BE(addr.workChain, 0)
+    addr.hash.copy(addrBuffer, 4)
 
-    const domainLength = Buffer.alloc(4)
-    domainLength.writeUInt32LE(proof.domain.lengthBytes, 0)
-    
-    const domainValue = Buffer.alloc(32, 0)
-    Buffer.from(proof.domain.value, "utf-8").copy(domainValue, 0, 0, 32)
+    const domainBuf = Buffer.from(proof.domain.value, "utf-8")
+    const domainLen = Buffer.alloc(4)
+    domainLen.writeUInt32LE(domainBuf.length, 0)
+    const appDomain = Buffer.concat([domainLen, domainBuf])
 
-    const timestampBuffer = Buffer.alloc(8)
-    timestampBuffer.writeBigUInt64LE(BigInt(proof.timestamp), 0)
+    const tsBuf = Buffer.alloc(8)
+    tsBuf.writeBigUInt64LE(BigInt(proof.timestamp), 0)
 
-    const payloadLength = Buffer.alloc(4)
-    payloadLength.writeUInt32LE(proof.payload.length, 0)
-    const payloadValue = Buffer.from(proof.payload, "utf-8")
+    const payloadBuf = Buffer.from(proof.payload, "utf-8")
+    const payloadLen = Buffer.alloc(4)
+    payloadLen.writeUInt32LE(payloadBuf.length, 0)
+    const payload = Buffer.concat([payloadLen, payloadBuf])
 
-    const message = Buffer.concat([
-      prefixBuffer,
-      addressBuffer,
-      domainLength,
-      domainValue,
-      timestampBuffer,
-      payloadLength,
-      payloadValue,
-    ])
+    const message = Buffer.concat([prefix, addrBuffer, appDomain, tsBuf, payload])
 
-    const { sha256 } = await import("@ton/crypto")
     const messageHash = await sha256(message)
-    
-    const TON_CONNECT_PREFIX = "ton-connect"
-    const tonConnectBuffer = Buffer.from(TON_CONNECT_PREFIX, "utf-8")
     const prefixWithHash = Buffer.concat([
       Buffer.from([0xff, 0xff]),
-      tonConnectBuffer,
+      Buffer.from("ton-connect", "utf-8"),
       messageHash,
     ])
-    
     const finalHash = await sha256(prefixWithHash)
 
     const signatureBuffer = Buffer.from(proof.signature, "base64")
-    const isValid = signVerify(finalHash, signatureBuffer, publicKeyBuffer)
-
-    if (!isValid) {
-      console.error("Верификация ton-proof не пройдена")
-    }
-
-    return isValid
-  } catch (error) {
-    console.error("Ошибка при верификации ton-proof:", error)
+    return signVerify(finalHash, signatureBuffer, publicKeyBuffer)
+    
+  } catch (e) {
+    console.error("TON verify error:", e)
     return false
   }
 }
