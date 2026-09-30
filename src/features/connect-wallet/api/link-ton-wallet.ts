@@ -10,12 +10,11 @@ type LinkResult = { success: true } | { success: false; error: string }
 export const linkTonWallet = async (
   address: string,
   publicKey: string,
-  nonce: string,
-  signature: string
+  proofJson: string
 ): Promise<LinkResult> => {
   const session = await auth()
   if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" }
+    return { success: false, error: "Не авторизован" }
   }
 
   const existingUser = await prisma.user.findUnique({
@@ -26,13 +25,13 @@ export const linkTonWallet = async (
   if (existingUser && existingUser.id !== session.user.id) {
     return {
       success: false,
-      error: "This wallet is already linked to another account.",
+      error: "Этот кошелёк уже привязан к другому аккаунту",
     }
   }
 
-  const isValid = await verifyTonProof(address, signature, nonce)
+  const isValid = await verifyTonProof(address, publicKey, proofJson)
   if (!isValid) {
-    return { success: false, error: "Wrong signature" }
+    return { success: false, error: "Неверная криптографическая подпись" }
   }
 
   await prisma.user.update({

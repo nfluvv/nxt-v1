@@ -19,7 +19,7 @@ export function TonConnectAuthButton() {
   const [proofPayload, setProofPayload] = useState<string | null>(null)
 
   useEffect(() => {
-    const payload = crypto.randomUUID()
+    const payload = globalThis.crypto.randomUUID()
     setProofPayload(payload)
 
     tonConnectUI.setConnectRequestParameters({
@@ -37,7 +37,7 @@ export function TonConnectAuthButton() {
     try {
       setIsLoading(true)
 
-      const newPayload = crypto.randomUUID()
+      const newPayload = globalThis.crypto.randomUUID()
       tonConnectUI.setConnectRequestParameters({
         state: "ready",
         value: { tonProof: newPayload },

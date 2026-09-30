@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useTonConnectUI } from "@tonconnect/ui-react"
 import { useRouter } from "next/navigation"
 import { toast } from "react-hot-toast"
@@ -15,39 +15,55 @@ export function LinkTonWalletButton() {
   const router = useRouter()
   const t = useTranslations("linkProvider")
   const [isLoading, setIsLoading] = useState(false)
+  const [proofPayload, setProofPayload] = useState<string | null>(null)
+
+  useEffect(() => {
+    const payload = globalThis.crypto.randomUUID()
+    setProofPayload(payload)
+    tonConnectUI.setConnectRequestParameters({
+      state: "ready",
+      value: { tonProof: payload },
+    })
+  }, [tonConnectUI])
 
   const handleLink = async () => {
+    if (!proofPayload) return
+
     try {
       setIsLoading(true)
-      
+
+      const newPayload = globalThis.crypto.randomUUID()
+      tonConnectUI.setConnectRequestParameters({
+        state: "ready",
+        value: { tonProof: newPayload },
+      })
+
       const connectedWallet = await tonConnectUI.connectWallet()
 
       if (!connectedWallet?.account?.address || !connectedWallet?.account?.publicKey) {
-        throw new Error("The wallet was not connected or the data is incomplete.")
+        throw new Error("Кошелёк не подключен")
       }
 
-      const nonce = globalThis.crypto.randomUUID()
-      const result = await tonConnectUI.signData({
-        type: "text",
-        text: nonce,
-      })
+      const tonProofItem = connectedWallet.connectItems?.tonProof
+      if (!tonProofItem || !("proof" in tonProofItem)) {
+        throw new Error("Кошелёк не поддерживает ton-proof")
+      }
 
       const res = await linkTonWallet(
         connectedWallet.account.address,
         connectedWallet.account.publicKey,
-        nonce,
-        result.signature
+        JSON.stringify(tonProofItem.proof)
       )
 
       if (!res.success) {
         throw new Error(res.error)
       }
 
-      toast.success(t("linkSuccess", { provider: "TON" }) || "Кошелёк успешно привязан")
+      toast.success(t("linkSuccess", { provider: "TON" }) || "Кошелёк привязан")
       router.refresh()
     } catch (error) {
       console.error("Link TON error:", error)
-      toast.error(error instanceof Error ? error.message : "Ошибка привязки кошелька")
+      toast.error(error instanceof Error ? error.message : "Ошибка привязки")
     } finally {
       setIsLoading(false)
     }
@@ -59,14 +75,14 @@ export function LinkTonWalletButton() {
       variant="outline"
       size="sm"
       onClick={handleLink}
-      disabled={isLoading}
+      disabled={isLoading || !proofPayload}
     >
       {isLoading ? (
         <Loader2 className="mr-2 size-3 animate-spin" />
       ) : (
         <Wallet className="mr-2 size-3" />
       )}
-      {t("link")}
+      {t("link") || "Привязать"}
     </Button>
   )
 }
