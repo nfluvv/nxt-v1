@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 
-import { LoginForm } from "@/features/login-by-email"
+import { LoginForm } from "@/features/login"
 import { AuthErrorToast } from "@/shared/client/ui"
 import { Container } from "@/shared/client/ui"
 

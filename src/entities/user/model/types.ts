@@ -2,11 +2,12 @@ export const USER_ROLES = ["USER", "ADMIN"] as const
 export type UserRole = (typeof USER_ROLES)[number]
 
 export type User = {
-  id: string
-  email: string
-  name: string | null
-  image: string | null
-  username: string | null
-  role: UserRole
-  twoFactorEnabled: boolean
-}
+  id: string;
+  name: string | null;
+  email: string | null;
+  image: string | null;
+  username: string | null;
+  role: "USER" | "ADMIN";
+  walletAddress: string | null;
+  accounts: { provider: string }[];
+};

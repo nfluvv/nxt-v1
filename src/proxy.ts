@@ -1,54 +1,49 @@
-import createIntlMiddleware from "next-intl/middleware"
+import createIntlMiddleware from "next-intl/middleware";
+import { auth } from "@/auth";
+import { checkAuthorization } from "@/auth.config";
+import { routing } from "@/shared/i18n/routing";
 
-import { auth } from "@/auth"
-import { checkAuthorization } from "@/auth.config"
-import { routing } from "@/shared/i18n/routing"
-
-const intlMiddleware = createIntlMiddleware(routing)
-
-const LOCALE_PATTERN = new RegExp(`^/(${routing.locales.join("|")})(/.*)?$`)
+const intlMiddleware = createIntlMiddleware(routing);
+const LOCALE_PATTERN = new RegExp(`^/(${routing.locales.join("|")})(/.*)?$`);
 
 function getLocale(pathname: string) {
-  const match = pathname.match(LOCALE_PATTERN)
-
-  return match?.[1] ?? routing.defaultLocale
+  const match = pathname.match(LOCALE_PATTERN);
+  return match?.[1] ?? routing.defaultLocale;
 }
 
 function stripLocale(pathname: string) {
-  const match = pathname.match(LOCALE_PATTERN)
-
-  return match ? match[2] || "/" : pathname
+  const match = pathname.match(LOCALE_PATTERN);
+  return match ? (match[2] || "/") : pathname;
 }
 
 export default auth((req) => {
-  const { pathname, origin } = req.nextUrl
+  const { pathname, origin } = req.nextUrl;
 
-  const intlResponse = intlMiddleware(req)
-
-  // /
-  // ↓
-  // /en
+  const intlResponse = intlMiddleware(req);
   if (intlResponse.status >= 300 && intlResponse.status < 400) {
-    return intlResponse
+    return intlResponse;
   }
 
-  const locale = getLocale(pathname)
-  const normalizedPathname = stripLocale(pathname)
+  const locale = getLocale(pathname);
+  const normalizedPathname = stripLocale(pathname);
 
   const result = checkAuthorization({
     isLoggedIn: !!req.auth?.user,
-    role: req.auth?.user?.role,
+    role: req.auth?.user?.role as "USER" | "ADMIN" | undefined,
     pathname: normalizedPathname,
-    baseUrl: `${origin}/${locale}`,
-  })
+    locale,
+    origin,
+  });
 
   if (result !== true) {
-    return result
+    return result;
   }
 
-  return intlResponse
-})
+  return intlResponse;
+});
 
 export const config = {
-  matcher: ["/", "/((?!api|_next|.*\\..*).*)"],
+  matcher: [
+    '/((?!api|_next/static|_next/image|favicon.ico|tonconnect-manifest.json).*)',
+  ],
 }

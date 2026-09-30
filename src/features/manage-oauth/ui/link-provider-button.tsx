@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, X } from "lucide-react"
+import { Plus, X, Loader2 } from "lucide-react"
 import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { toast } from "react-hot-toast"
@@ -49,12 +49,10 @@ export const LinkProviderButton = ({
             callbackUrl: "/settings?linked=1",
           })
         }
-        className="group relative flex h-5 w-20 cursor-pointer items-center justify-center overflow-hidden rounded-full transition-colors"
+        className="group relative flex h-8 w-24 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-border bg-background transition-colors hover:bg-emerald-500/10 hover:text-emerald-500"
       >
-        <span className="absolute inset-0 rounded-full bg-muted transition-colors group-hover:bg-emerald-500/10" />
-
-        <span className="relative flex items-center gap-1 text-[10px] font-medium text-muted-foreground transition-colors group-hover:text-emerald-500">
-          <Plus className="size-3 opacity-0 transition-opacity duration-150 group-hover:opacity-100" />
+        <span className="relative flex items-center gap-1 text-xs font-medium">
+          <Plus className="size-3" />
           {t("link")}
         </span>
       </button>
@@ -63,9 +61,7 @@ export const LinkProviderButton = ({
 
   const handleUnlink = async () => {
     setIsPending(true)
-
     const result = await unlinkProvider(provider)
-
     setIsPending(false)
     setConfirmOpen(false)
 
@@ -74,12 +70,7 @@ export const LinkProviderButton = ({
       return
     }
 
-    toast.success(
-      t("unlinkSuccess", {
-        provider: providerName,
-      })
-    )
-
+    toast.success(t("unlinkSuccess", { provider: providerName }))
     router.refresh()
   }
 
@@ -88,15 +79,12 @@ export const LinkProviderButton = ({
       <button
         type="button"
         onClick={() => setConfirmOpen(true)}
-        className="group relative flex h-5 w-20 cursor-pointer items-center justify-center overflow-hidden rounded-full transition-colors"
+        className="group relative flex h-8 w-24 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-500 transition-colors hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
       >
-        <span className="absolute inset-0 rounded-full bg-emerald-500/10 transition-colors group-hover:bg-destructive/10" />
-
-        <span className="relative text-[10px] font-medium text-emerald-500 transition-opacity duration-150 group-hover:opacity-0">
+        <span className="relative flex items-center gap-1 text-xs font-medium transition-opacity duration-150 group-hover:opacity-0">
           {t("active")}
         </span>
-
-        <span className="absolute inset-0 flex items-center justify-center gap-1 text-[10px] font-medium text-destructive opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+        <span className="absolute inset-0 flex items-center justify-center gap-1 text-xs font-medium text-destructive opacity-0 transition-opacity duration-150 group-hover:opacity-100">
           <X className="size-3" />
           {t("unlink")}
         </span>
@@ -106,24 +94,24 @@ export const LinkProviderButton = ({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {t("unlinkTitle", {
-                provider: providerName,
-              })}
+              {t("unlinkTitle", { provider: providerName })}
             </AlertDialogTitle>
-
             <AlertDialogDescription>
-              {t("unlinkDescription", {
-                provider: providerName,
-              })}
+              {t("unlinkDescription", { provider: providerName })}
             </AlertDialogDescription>
           </AlertDialogHeader>
-
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isPending}>
               {tc("cancel")}
             </AlertDialogCancel>
-
-            <AlertDialogAction onClick={handleUnlink} disabled={isPending}>
+            <AlertDialogAction 
+              onClick={handleUnlink} 
+              disabled={isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isPending ? (
+                <Loader2 className="mr-2 size-4 animate-spin" />
+              ) : null}
               {isPending ? t("unlinkPending") : t("unlink")}
             </AlertDialogAction>
           </AlertDialogFooter>

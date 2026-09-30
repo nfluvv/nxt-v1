@@ -1,12 +1,10 @@
 export const siteConfig = {
-  name: "Next Template",
+  name: "Nxt template v2",
   description: "Next.js FSD Template",
   routes: {
     home: "/",
     login: "/login",
-    register: "/register",
     settings: "/settings",
     admin: "/admin",
-    forgotPassword: "/forgot-password",
   },
 }

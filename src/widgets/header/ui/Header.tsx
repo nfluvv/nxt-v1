@@ -38,12 +38,6 @@ export async function Header() {
               >
                 {t("login")}
               </Link>
-              <Link
-                href={siteConfig.routes.register}
-                className={buttonVariants({ size: "sm" })}
-              >
-                {t("register")}
-              </Link>
             </div>
           )}
         </div>

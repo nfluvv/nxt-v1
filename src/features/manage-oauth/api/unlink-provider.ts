@@ -1,7 +1,6 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-
 import { auth } from "@/auth"
 import { prisma } from "@/shared/server/db/prisma"
 
@@ -11,20 +10,29 @@ export const unlinkProvider = async (
   provider: "google" | "github"
 ): Promise<UnlinkResult> => {
   const session = await auth()
-  if (!session?.user) return { success: false, error: "Не авторизован" }
+  if (!session?.user?.id) {
+    return { success: false, error: "Не авторизован" }
+  }
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { passwordHash: true, accounts: { select: { provider: true } } },
+    select: {
+      walletAddress: true, // Проверяем наличие Web3 входа
+      accounts: { select: { provider: true } },
+    },
   })
-  if (!user) return { success: false, error: "User not found" }
 
-  const hasOtherLoginMethod =
-    Boolean(user.passwordHash) || user.accounts.length > 1
+  if (!user) {
+    return { success: false, error: "Пользователь не найден" }
+  }
+
+  const otherOAuthAccounts = user.accounts.filter((a) => a.provider !== provider)
+  const hasOtherLoginMethod = Boolean(user.walletAddress) || otherOAuthAccounts.length > 0
+
   if (!hasOtherLoginMethod) {
     return {
       success: false,
-      error: "It's impossible to unlink the only login method for an account",
+      error: "Невозможно отключить единственный способ входа в аккаунт",
     }
   }
 

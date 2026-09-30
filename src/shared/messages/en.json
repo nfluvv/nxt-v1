@@ -12,30 +12,6 @@
     "active": "Active"
   },
 
-  "emails": {
-    "verifyEmail": {
-        "subject": "Confirm your email",
-        "heading": "Confirm your email",
-        "body": "Click the link to confirm your email. The link is valid for 24 hours.",
-        "cta": "Confirm email",
-        "ignoreNote": "If you didn't sign up, just ignore this email."
-    },
-    "resetPassword": {
-        "subject": "Reset your password",
-        "heading": "Reset your password",
-        "body": "Click the link to set a new password. The link is valid for 1 hour.",
-        "cta": "Reset password",
-        "ignoreNote": "If you didn't request a password reset, just ignore this email."
-    },
-    "changeEmail": {
-        "subject": "Confirm your new email",
-        "heading": "Confirm your new email",
-        "body": "You requested to change your email to this address. Click the link to confirm. The link is valid for 1 hour.",
-        "cta": "Confirm new email",
-        "ignoreNote": "If you didn't request an email change, just ignore this email."
-    }
-},
-
   "loginForm": {
     "successLogin": "Signed in successfully",
     "invalidCredentials": "Incorrect email or password",
@@ -74,14 +50,6 @@
     "emailVerified": "Email verified. Log in to continue."
   },
 
-  "passwordStrength": {
-    "label": "Password strength",
-    "weak": "Weak",
-    "fair": "Fair",
-    "good": "Good",
-    "strong": "Strong"
-  },
-
   "meta": {
     "settingsTitle": "Settings",
     "forbiddenTitle": "Access denied",
@@ -96,6 +64,7 @@
     "userNotFound": "Uset not found"
   },
 
+
   "Auth": {
     "login": "Log in",
     "theLogin": "Log in",
@@ -107,37 +76,16 @@
     "forgotPassword": "Forgot password?",
     "Name": "Name",
     "NameExample": "John",
-    "continueWith": "Continue with"
-  },
-
-  "twoFactorVerify": {
-    "title": "Verify your sign-in",
-    "description": "Enter the code from your authenticator app or a backup code.",
-    "code": "Authenticator code",
-    "submitPending": "Checking...",
-    "submit": "Log in"
-  },
-
-  "forgotPassword": {
-    "title": "Reset your password",
-    "description": "Enter your email and we'll send you a reset link.",
-    "submit": "Send reset link",
-    "submitPending": "Sending...",
-    "titleEmailStep": "Check your email",
-    "resetLinkSent": "If an account with {email} exists, we have sent a password reset link to it."
-  },
-
-  "resetPassword": {
-    "invalidTitle": "Invalid link",
-    "invalidDescription": "This link is missing a password reset token.",
-    "backToLogin": "Log in",
-    "title": "New password",
-    "newPasswordLabel": "New password",
-    "confirmPasswordLabel": "Repeat password",
-    "saving": "Saving...",
-    "submit": "Save password",
-    "successTitle": "Password updated",
-    "successDescription": "Redirecting you to the login page..."
+    "continueWith": "Continue with",
+    "or": "Or",
+    "connectTonWallet": "Connect TON Wallet",
+    "signInWithTon": "Sign in with TON",
+    "tonConnectError": "Failed to connect TON wallet",
+    "tonSignInError": "Failed to sign in with TON",
+    "successLogin": "Successfully logged in",
+    "loginViaTon": "Log In via TON",
+    "connectTon": "Connect your TON wallet",
+    "tonError": "Error logging in via TON"
   },
 
   "roleSelect": {
@@ -178,30 +126,10 @@
     "home": "Back home"
   },
 
-  "confirmEmailChange": {
-    "invalidTitle": "Invalid link",
-    "invalidTokenDescription": "This link is missing a confirmation token.",
-    "title": "Confirm your new email",
-    "description": "Click the button to confirm your email change.",
-    "confirm": "Confirm",
-    "expiredDescription": "This link has expired, was already used, or the email is already taken. Try requesting the email change again in settings.",
-    "toSettings": "Go to settings"
-  },
-
   "userNotFound": {
     "title": "User not found",
     "description": "This account may have been deleted, or the link is incorrect.",
     "action": "Back home"
-  },
-
-  "verifyEmail": {
-    "invalidTitle": "Invalid link",
-    "invalidTokenDescription": "This link is missing a confirmation token.",
-    "expiredDescription": "This link has expired or was already used. Try logging in — if your email is still unverified, you can request a new link there.",
-    "login": "Log in",
-    "title": "Verify your email",
-    "description": "Click the button to verify your email.",
-    "confirm": "Verify email"
   },
 
   "userMenu": {
@@ -228,20 +156,6 @@
     "nameDesc": "The display name other users will see.",
     "usernameTitle": "Username",
     "usernameDesc": "A unique identifier for your profile.",
-    "security": "Security",
-    "securityDesc": "Sign-in and account protection settings.",
-    "2faTitle": "Two-factor authentication",
-    "2faDesc": "Add an extra layer of security to your sign-in.",
-    "2faDisabledHint": "Two-factor authentication is not enabled. Add an extra layer of protection to your account.",
-    "2faEnable": "Enable 2FA",
-    "2faEnabledHint": "Two-factor authentication is enabled. Confirm with a code from your app to disable it.",
-    "2faDisable": "Disable",
-    "shangePassword": "Change password",
-    "changePasswordDesc": "Update your password to protect your account.",
-    "setPassword": "Setting a password",
-    "setPasswordDesc": "Add a password to further secure your account.",
-    "changeEmailTitle": "Email",
-    "changeEmailDesc": "Email for login and notifications.",
     "connectionsTitle": "Connections",
     "connectionsDesc": "External services linked to your account.",
     "dangerZoneTitle": "Danger zone",
@@ -264,47 +178,6 @@
     "delete": "Delete permanently",
     "deletePending": "Deleting...",
     "success": "Account deleted"
-  },
-
-  "changeEmail": {
-    "currentEmail": "Current email: {email}",
-    "newEmail": "New email",
-    "password": "Password",
-    "twoFactorCode": "Code from the authenticator app",
-    "totpPlaceholder": "123456",
-    "submit": "Change email",
-    "submitPending": "Sending...",
-    "success": "A confirmation email has been sent to your new address"
-  },
-
-  "changePasswordForm": {
-    "currentPassword": "Current password",
-    "newPassword": "New password",
-    "confirmPassword": "Repeat new password",
-    "saving": "Saving...",
-    "changePassword": "Change password",
-    "setPassword": "Set password",
-    "unexpectedError": "Something went wrong. Please try again."
-  },
-
-  "twoFactor": {
-    "backupStep": "02 / BACKUP",
-    "backupTitle": "Save your backup codes",
-    "backupDescription": "Each code can only be used once. Store them somewhere safe — they will not be shown again.",
-    "done": "Done",
-    "disableDescription": "Two-factor authentication is enabled. Confirm with a code from your authenticator app to disable it.",
-    "code": "Authenticator code",
-    "codePlaceholder": "123456",
-    "checking": "Checking...",
-    "disable": "Disable",
-    "confirm": "Confirm",
-    "disabledSuccess": "Two-factor authentication disabled",
-    "notEnabledDescription": "Two-factor authentication is not enabled. Add an extra layer of protection to your account.",
-    "enable": "Enable 2FA",
-    "setupTitle": "Set up 2FA",
-    "setupDescription": "Scan the QR code in your authenticator app, then enter the generated code.",
-    "qrCodeAlt": "QR code for two-factor authentication setup",
-    "manualSetupKey": "Manual setup key"
   },
 
   "SiteConfig": {
@@ -355,20 +228,6 @@
     "success": "Name updated",
     "saving": "Saving..."
   },
-
-  "registerSuccess": {
-    "title": "Check your email",
-    "description": "We've sent an email to <email></email>. Click the link in the email to complete your registration.",
-    "pending": "Verification pending",
-    "backToLogin": "Back to login"
-},
-
-  "loginVerification": {
-    "notVerified": "Email not verified.",
-    "checkInboxOrResend": "Check your inbox or request a new email.",
-    "resending": "Sending...",
-    "resend": "Resend email"
-},
 
   "themes": {
     "dark": "Dark",

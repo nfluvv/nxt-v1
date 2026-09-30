@@ -1,12 +1,10 @@
 "use server"
 
-import { compare } from "bcrypt-ts"
 import { getTranslations } from "next-intl/server"
 
 import { auth } from "@/auth"
 import { prisma } from "@/shared/server/db/prisma"
 import { createDeleteAccountSchema } from "@/entities/user"
-import { verifyTotpCode, decryptSecret } from "@/shared/server/auth/totp"
 import { checkRateLimit } from "@/shared/server/security/rate-limit"
 import { getClientIp } from "@/shared/server/lib/get-client-ip"
 
@@ -34,30 +32,8 @@ export const deleteAccount = async (raw: unknown): Promise<DeleteResult> => {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: {
-      passwordHash: true,
-      twoFactorEnabled: true,
-      twoFactorSecret: true,
-    },
   })
   if (!user) return { success: false, error: "User not found" }
-
-  if (user.passwordHash) {
-    if (!parsed.data.password)
-      return { success: false, error: "Enter your password" }
-    const isValid = await compare(parsed.data.password, user.passwordHash)
-    if (!isValid) return { success: false, error: "The password is wrong" }
-  }
-
-  if (user.twoFactorEnabled && user.twoFactorSecret) {
-    if (!parsed.data.totpCode)
-      return { success: false, error: "Enter the code from the app" }
-    const isValid = verifyTotpCode(
-      decryptSecret(user.twoFactorSecret),
-      parsed.data.totpCode
-    )
-    if (!isValid) return { success: false, error: "Wrong code" }
-  }
 
   await prisma.user.delete({ where: { id: session.user.id } })
 

@@ -1,6 +1,7 @@
-import type { NextAuthConfig } from "next-auth"
+import type { NextAuthConfig } from "next-auth";
 
 const PUBLIC_ROUTES = [
+  "/",           // ← ВОТ ЭТА СТРОКА. Без неё бесконечный редирект.
   "/login",
   "/register",
   "/forbidden",
@@ -9,58 +10,54 @@ const PUBLIC_ROUTES = [
   "/users",
   "/reset-password",
   "/confirm-email-change",
-]
+];
 
 type CheckAuthorizationParams = {
-  isLoggedIn: boolean
-  role?: "USER" | "ADMIN"
-  pathname: string
-  baseUrl: string
-}
+  isLoggedIn: boolean;
+  role?: "USER" | "ADMIN";
+  pathname: string;
+  locale: string;
+  origin: string;
+};
 
 export function checkAuthorization({
   isLoggedIn,
   role,
   pathname,
-  baseUrl,
+  locale,
+  origin,
 }: CheckAuthorizationParams): true | Response {
-  const isHomePage = pathname === "/"
-
-  const isPublicRoute =
-    isHomePage || PUBLIC_ROUTES.some((route) => pathname.startsWith(route))
-
-  const isAdminRoute = pathname.startsWith("/admin")
-
-  if (isAdminRoute) {
-    if (role !== "ADMIN") {
-      return Response.redirect(`${baseUrl}/forbidden?reason=forbidden`)
-    }
-
-    return true
+  if (isLoggedIn && pathname === "/") {
+    return Response.redirect(new URL(`/${locale}/dashboard`, origin));
   }
+
+  // 2. Админ-зона
+  if (pathname.startsWith("/admin") && role !== "ADMIN") {
+    return Response.redirect(new URL(`/${locale}`, origin));
+  }
+
+  // 3. Неавторизованный на защищённом маршруте → главная
+  const isPublicRoute = PUBLIC_ROUTES.some((route) =>
+    pathname === route || pathname.startsWith(`${route}/`)
+  );
 
   if (!isLoggedIn && !isPublicRoute) {
-    return Response.redirect(`${baseUrl}/forbidden?reason=unauthenticated`)
+    return Response.redirect(new URL(`/${locale}`, origin));
   }
 
-  return true
+  return true;
 }
 
 export const authConfig = {
   pages: {
     signIn: "/login",
-    error: "/",
+    error: "/login",
   },
-
   session: {
     strategy: "jwt",
   },
-
   providers: [],
-
   callbacks: {
-    authorized() {
-      return true
-    },
+    authorized: () => true,
   },
-} satisfies NextAuthConfig
+} satisfies NextAuthConfig;

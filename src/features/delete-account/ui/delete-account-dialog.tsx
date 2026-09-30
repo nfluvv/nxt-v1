@@ -32,15 +32,8 @@ import {
 
 import { deleteAccount } from "../api/delete-account"
 
-type DeleteAccountDialogProps = {
-  hasPassword: boolean
-  twoFactorEnabled: boolean
-}
 
-export const DeleteAccountDialog = ({
-  hasPassword,
-  twoFactorEnabled,
-}: DeleteAccountDialogProps) => {
+export const DeleteAccountDialog = () => {
   const [open, setOpen] = useState(false)
 
   const t = useTranslations("deleteAccount")
@@ -114,48 +107,6 @@ export const DeleteAccountDialog = ({
                 </FormItem>
               )}
             />
-
-            {hasPassword && (
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("password")}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        {...field}
-                        autoComplete="new-password"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-
-            {twoFactorEnabled && (
-              <FormField
-                control={form.control}
-                name="totpCode"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("twoFactorCode")}</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={t("totpPlaceholder")}
-                        maxLength={6}
-                        inputMode="numeric"
-                        autoComplete="one-time-code"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
 
             <AlertDialogFooter>
               <AlertDialogCancel type="button">

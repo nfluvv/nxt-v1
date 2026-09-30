@@ -15,17 +15,15 @@ export const getCurrentUser = cache(async () => {
     select: {
       id: true,
       name: true,
-      username: true,
       email: true,
       image: true,
+      username: true,
       role: true,
-      twoFactorEnabled: true,
+      walletAddress: true,
       accounts: {
-        select: {
-          provider: true,
-        },
-      },
-    },
+        select: { provider: true }
+      }
+    }
   })
 })
 
@@ -41,15 +39,6 @@ export const getUserByUsername = cache(async (username: string) => {
     },
   })
 })
-
-export const hasPassword = async (userId: string) => {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { passwordHash: true },
-  })
-
-  return Boolean(user?.passwordHash)
-}
 
 type GetAllUsersParams = {
   query?: string

@@ -21,18 +21,18 @@ export async function HomePage() {
         {!isUserLoggedIn && (
           <>
             <Link
-              href={siteConfig.routes.register}
+              href={siteConfig.routes.login}
               className={buttonVariants({ variant: "default" })}
             >
               {t("register")}
             </Link>
 
-            <Link
+            {/* <Link
               href={siteConfig.routes.login}
               className={buttonVariants({ variant: "outline" })}
             >
               {t("login")}
-            </Link>
+            </Link> */}
           </>
         )}
       </div>

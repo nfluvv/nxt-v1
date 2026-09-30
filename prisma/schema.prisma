@@ -10,15 +10,12 @@ model User {
   id            String    @id @default(cuid())
   name          String?
   username      String?   @unique
-  email         String    @unique
+  email         String?   @unique
   emailVerified DateTime?
   image         String?
-  passwordHash  String?
   role          Role      @default(USER)
 
-  twoFactorEnabled     Boolean  @default(false)
-  twoFactorSecret      String?
-  twoFactorBackupCodes String[] @default([])
+  walletAddress String?   @unique // Tonkeeper adress
 
   accounts Account[]
 
@@ -47,15 +44,6 @@ model Account {
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
-}
-
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
-
-  @@unique([identifier, token])
-  @@map("verification_tokens")
 }
 
 model RoleChangeLog {

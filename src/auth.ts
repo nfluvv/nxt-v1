@@ -1,23 +1,14 @@
-import NextAuth from "next-auth"
-import Credentials from "next-auth/providers/credentials"
-import GitHub from "next-auth/providers/github"
-import Google from "next-auth/providers/google"
-import { compare } from "bcrypt-ts"
+import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
+import GitHub from "next-auth/providers/github";
+import Google from "next-auth/providers/google";
+import { z } from "zod";
 
-import { prisma } from "@/shared/server/db/prisma"
-import { createCredentialsSchema } from "@/entities/user"
-import { PrismaAdapter } from "@auth/prisma-adapter"
-import { authConfig } from "@/auth.config"
-import { generateUniqueUsername } from "@/entities/user/lib/generate-username"
-import { verifyAutoLoginToken } from "@/shared/server/auth/auto-login-token"
-import {
-  decryptSecret,
-  verifyBackupCode,
-  verifyTotpCode,
-} from "@/shared/server/auth/totp"
-import { checkRateLimit } from "@/shared/server/security/rate-limit"
-import { getClientIp } from "@/shared/server/lib/get-client-ip"
-import { getTranslations } from "next-intl/server"
+import { prisma } from "@/shared/server/db/prisma";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import { authConfig } from "@/auth.config";
+import { generateUniqueUsername } from "@/entities/user/lib/generate-username";
+import { verifyTonSignature } from "@/shared/server/auth/crypto";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -33,120 +24,165 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           name: profile.name ?? profile.login,
           email: profile.email,
           image: profile.avatar_url,
-        }
+          walletAddress: null, // Явно указываем null для OAuth-пользователей
+        };
       },
     }),
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
       clientSecret: process.env.AUTH_GOOGLE_SECRET,
       allowDangerousEmailAccountLinking: true,
-    }),
-    Credentials({
-      credentials: { email: {}, password: {}, totpCode: {} },
-      authorize: async (raw) => {
-        const ip = await getClientIp()
-        const allowed = await checkRateLimit(`login:ip:${ip}`, {
-          limit: 5,
-          windowMs: 60_000,
-        })
-        if (!allowed) return null
-
-        const t = await getTranslations("validation")
-        const parsed = createCredentialsSchema(t).safeParse(raw)
-        if (!parsed.success) return null
-
-        const { email, password } = parsed.data
-        const user = await prisma.user.findUnique({ where: { email } })
-        if (!user?.passwordHash) return null
-
-        const isValid = await compare(password, user.passwordHash)
-        if (!isValid) return null
-
-        if (!user.emailVerified) return null
-
-        if (user.twoFactorEnabled) {
-          const totpCode = raw?.totpCode as string | undefined
-          if (!totpCode) return null
-
-          const validTotp =
-            user.twoFactorSecret &&
-            verifyTotpCode(decryptSecret(user.twoFactorSecret), totpCode)
-
-          if (!validTotp) {
-            const codeIndex = await verifyBackupCode(
-              totpCode,
-              user.twoFactorBackupCodes
-            )
-            if (codeIndex === -1) return null
-
-            const remaining = user.twoFactorBackupCodes.filter(
-              (_, i) => i !== codeIndex
-            )
-            await prisma.user.update({
-              where: { id: user.id },
-              data: { twoFactorBackupCodes: remaining },
-            })
-          }
-        }
-
+      profile(profile) {
         return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
-        }
+          id: profile.sub,
+          name: profile.name,
+          email: profile.email,
+          image: profile.picture,
+          walletAddress: null,
+        };
       },
     }),
     Credentials({
-      id: "auto-login",
-      name: "Auto Login",
-      credentials: { token: {} },
-      authorize: async (raw) => {
-        const token = raw?.token as string | undefined
-        if (!token) return null
+      id: "ton-connect",
+      name: "TON Connect",
+      credentials: {
+        address: { label: "Address", type: "text" },
+        signature: { label: "Signature", type: "text" },
+        nonce: { label: "Nonce", type: "text" },
+        publicKey: { label: "Public Key", type: "text" },
+      },
+      async authorize(credentials) {
+        const parsed = z
+          .object({
+            address: z.string().min(1),
+            signature: z.string().min(1),
+            nonce: z.string().min(1),
+            publicKey: z.string().min(1),
+          })
+          .safeParse(credentials);
 
-        const userId = verifyAutoLoginToken(token)
-        if (!userId) return null
+        if (!parsed.success) {
+          throw new Error("INVALID_CREDENTIALS_FORMAT");
+        }
 
-        const user = await prisma.user.findUnique({ where: { id: userId } })
-        if (!user) return null
+        const isValid = await verifyTonSignature(
+          parsed.data.address,
+          parsed.data.signature,
+          parsed.data.nonce,
+          parsed.data.publicKey
+        );
+
+        if (!isValid) {
+          throw new Error("INVALID_SIGNATURE");
+        }
+
+        const user = await prisma.user.upsert({
+          where: { walletAddress: parsed.data.address },
+          update: {
+            updatedAt: new Date(),
+          },
+          create: {
+            walletAddress: parsed.data.address,
+            role: "USER",
+          },
+        });
 
         return {
           id: user.id,
-          email: user.email,
+          role: user.role,
+          walletAddress: user.walletAddress,
+          username: user.username,
           name: user.name,
+          email: user.email,
           image: user.image,
-        }
+        };
       },
     }),
   ],
   events: {
     async createUser({ user }) {
-      if (!user.id) return
-      const seed = user.email?.split("@")[0] ?? user.name ?? "user"
-      const username = await generateUniqueUsername(seed)
+      if (!user.id) return;
+
+      const seed =
+        user.email?.split("@")[0] ??
+        user.name ??
+        (user.walletAddress ? user.walletAddress.slice(2, 10) : "web3_user");
+      
+      const username = await generateUniqueUsername(seed);
+
       await prisma.user.update({
         where: { id: user.id },
-        data: { username, emailVerified: user.emailVerified ?? new Date() },
-      })
+        data: {
+          username,
+          ...(user.email && { emailVerified: new Date() }),
+        },
+      });
     },
   },
   callbacks: {
     ...authConfig.callbacks,
-    async signIn({ account }) {
-      if (
-        !account ||
-        account.provider === "credentials" ||
-        account.provider === "auto-login"
-      ) {
-        return true
-      }
+    async signIn({ account, profile }) {
+      if (account?.provider === "google" || account?.provider === "github") {
+        const session = await auth();
+        
+        if (session?.user?.id) {
+          const existingAccount = await prisma.account.findUnique({
+            where: {
+              provider_providerAccountId: {
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+              },
+            },
+            select: { userId: true },
+          });
 
-      return true
+          if (existingAccount && existingAccount.userId !== session.user.id) {
+            return `/login?error=AccountAlreadyLinked`;
+          }
+
+          await prisma.account.create({
+            data: {
+              userId: session.user.id,
+              type: account.type,
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
+              refresh_token: account.refresh_token ?? null,
+              access_token: account.access_token ?? null,
+              expires_at: account.expires_at ?? null,
+              token_type: account.token_type ?? null,
+              scope: account.scope ?? null,
+              id_token: account.id_token ?? null,
+              // Явное приведение типа, чтобы Prisma не ругался на JsonValue
+              session_state: account.session_state ? String(account.session_state) : null,
+            },
+          });
+
+          // Безопасное обновление без spread-операторов, которые ломают TS
+          if (profile) {
+            const updateData: Record<string, string> = {};
+            if ("email" in profile && profile.email) updateData.email = String(profile.email);
+            if ("image" in profile && profile.image) updateData.image = String(profile.image);
+
+            if (Object.keys(updateData).length > 0) {
+              await prisma.user.update({
+                where: { id: session.user.id },
+                data: updateData,
+              });
+            }
+          }
+
+          return true;
+        }
+      }
+      return true;
     },
+
     jwt: async ({ token, user, trigger }) => {
       if (user?.id) {
-        token.id = user.id
+        token.id = user.id;
+        token.role = (user.role as "USER" | "ADMIN") ?? "USER";
+        token.walletAddress = user.walletAddress ?? null;
+        token.username = user.username ?? null;
       }
 
       if (token.id && (user || trigger === "update")) {
@@ -156,24 +192,32 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             role: true,
             name: true,
             image: true,
+            walletAddress: true,
+            username: true,
           },
-        })
+        });
 
-        token.role = dbUser?.role
-        token.name = dbUser?.name
-        token.picture = dbUser?.image
+        if (dbUser) {
+          token.role = dbUser.role;
+          token.name = dbUser.name;
+          token.picture = dbUser.image;
+          token.walletAddress = dbUser.walletAddress;
+          token.username = dbUser.username;
+        }
       }
-
-      return token
+      return token;
     },
+
     session: ({ session, token }) => {
       if (session.user) {
-        session.user.id = token.id as string
-        session.user.role = token.role as "USER" | "ADMIN"
-        session.user.name = token.name ?? null
-        session.user.image = token.picture ?? null
+        session.user.id = token.id as string;
+        session.user.role = token.role as "USER" | "ADMIN";
+        session.user.name = token.name ?? null;
+        session.user.image = token.picture ?? null;
+        session.user.walletAddress = token.walletAddress as string | null;
+        session.user.username = token.username as string | null;
       }
-      return session
+      return session;
     },
   },
-})
+});

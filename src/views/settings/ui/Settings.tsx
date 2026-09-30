@@ -1,5 +1,5 @@
 import { auth } from "@/auth"
-import { getCurrentUser, hasPassword } from "@/entities/user/api/queries"
+import { getCurrentUser } from "@/entities/user/api/queries"
 import { ProfileSettings } from "@/widgets/profile-settings"
 import { Container } from "@/shared/client/ui"
 import { getTranslations } from "next-intl/server"
@@ -10,8 +10,6 @@ export async function SettingsPage() {
 
   const user = await getCurrentUser()
   if (!user) return null
-
-  const userHasPassword = await hasPassword(user.id)
 
   const t = await getTranslations("userSettings")
 
@@ -33,7 +31,7 @@ export async function SettingsPage() {
           </p>
         </div>
 
-        <ProfileSettings user={user} userHasPassword={userHasPassword} />
+        <ProfileSettings user={user} />
 
         <div className="mt-5 flex items-center justify-between px-1">
           <span className="font-mono text-[9px] tracking-[0.2em] text-muted-foreground/60 uppercase">

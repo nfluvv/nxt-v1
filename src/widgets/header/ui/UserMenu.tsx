@@ -102,7 +102,7 @@ export function UserMenu({ user }: UserMenuProps) {
           <Link
             href={
               user.username
-                ? `/users/${user.username}`
+                ? `/u/${user.username}`
                 : siteConfig.routes.settings
             }
           >

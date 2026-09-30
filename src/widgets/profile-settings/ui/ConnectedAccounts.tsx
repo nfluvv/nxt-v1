@@ -1,23 +1,31 @@
-import { GitHubIcon, GoogleIcon } from "@/shared/client/ui"
-import { LinkProviderButton } from "@/features/manage-oauth"
+"use client"
+
+import { Wallet } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { GitHubIcon, GoogleIcon } from "@/shared/client/ui"
+
+import { LinkProviderButton,  } from "@/features/manage-oauth"
+import { LinkTonWalletButton, UnlinkTonWalletButton } from "@/features/connect-wallet"
 
 type Provider = "google" | "github"
 
-type ConnectedAccountsProps = Record<Provider, boolean>
+type ConnectedAccountsProps = {
+  google: boolean
+  github: boolean
+  tonWallet: boolean
+}
 
 const PROVIDERS: Array<{
   id: Provider
   name: string
-  icon: typeof GoogleIcon
+  icon: typeof Wallet
 }> = [
   { id: "google", name: "Google", icon: GoogleIcon },
   { id: "github", name: "GitHub", icon: GitHubIcon },
 ]
 
-export function ConnectedAccounts({ google, github }: ConnectedAccountsProps) {
+export function ConnectedAccounts({ google, github, tonWallet }: ConnectedAccountsProps) {
   const connected: Record<Provider, boolean> = { google, github }
-
   const t = useTranslations("common")
 
   return (
@@ -51,6 +59,26 @@ export function ConnectedAccounts({ google, github }: ConnectedAccountsProps) {
           </div>
         )
       })}
+
+      <div className="flex items-center justify-between rounded-lg border border-border/50 bg-muted/20 px-3.5 py-3">
+        <div className="flex items-center gap-3">
+          <span className="flex size-7 items-center justify-center rounded-md border bg-background shadow-sm">
+            <Wallet className="size-4" />
+          </span>
+          <div>
+            <p className="text-xs font-medium">TON Wallet</p>
+            <p className="text-[10px] text-muted-foreground">
+              {tonWallet ? t("connected") : t("notConnected")}
+            </p>
+          </div>
+        </div>
+
+        {tonWallet ? (
+          <UnlinkTonWalletButton />
+        ) : (
+          <LinkTonWalletButton />
+        )}
+      </div>
     </div>
   )
 }

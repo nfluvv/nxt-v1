@@ -1,33 +1,19 @@
 import { AvatarUploader } from "@/features/update-avatar"
-import { ChangePasswordForm } from "@/features/change-password"
-import { TwoFactorSettings } from "@/features/manage-two-factor"
 import { UpdateNameForm } from "@/features/update-name"
 import { UpdateUsernameForm } from "@/features/update-username"
 import { DeleteAccountDialog } from "@/features/delete-account"
-import { ChangeEmailForm } from "@/features/change-email"
+import { ConnectedAccounts } from "./ConnectedAccounts"
 
 import { SettingsRow } from "./SettingsRow"
 import { SettingsSection } from "./SettingsSection"
-import { ConnectedAccounts } from "./ConnectedAccounts"
 import { useTranslations } from "next-intl"
+import type { User } from "@/entities/user"
 
 type ProfileSettingsProps = {
-  user: {
-    id: string
-    name: string | null
-    username: string | null
-    email: string
-    image: string | null
-    twoFactorEnabled: boolean
-    accounts: Array<{ provider: string }>
-  }
-  userHasPassword: boolean
+  user: User
 }
 
-export function ProfileSettings({
-  user,
-  userHasPassword,
-}: ProfileSettingsProps) {
+export function ProfileSettings({ user }: ProfileSettingsProps) {
   const t = useTranslations("userSettings")
   const connectedProviders = new Set(
     user.accounts.map((account) => account.provider)
@@ -39,7 +25,7 @@ export function ProfileSettings({
         <SettingsRow title={t("avatarTitle")} description={t("avatarDesc")}>
           <AvatarUploader
             currentImage={user.image}
-            fallback={(user.name ?? user.email).charAt(0).toUpperCase()}
+            fallback={((user.name ?? user.email) ?? "").charAt(0).toUpperCase()}
           />
         </SettingsRow>
 
@@ -52,33 +38,6 @@ export function ProfileSettings({
         </SettingsRow>
       </SettingsSection>
 
-      <SettingsSection title={t("security")} description={t("securityDesc")}>
-        {userHasPassword && (
-          <SettingsRow title={t("2faTitle")} description={t("2faDesc")}>
-            <TwoFactorSettings isEnabled={user.twoFactorEnabled} />
-          </SettingsRow>
-        )}
-
-        <SettingsRow
-          title={userHasPassword ? t("shangePassword") : t("setPassword")}
-          description={
-            userHasPassword ? t("changePasswordDesc") : t("setPasswordDesc")
-          }
-        >
-          <ChangePasswordForm hasPassword={userHasPassword} />
-        </SettingsRow>
-
-        {user.accounts.length === 0 && (
-          <SettingsRow title="Email" description={t("changeEmailDesc")}>
-            <ChangeEmailForm
-              currentEmail={user.email}
-              hasPassword={userHasPassword}
-              twoFactorEnabled={user.twoFactorEnabled}
-            />
-          </SettingsRow>
-        )}
-      </SettingsSection>
-
       <SettingsSection
         title={t("connectionsTitle")}
         description={t("connectionsDesc")}
@@ -86,6 +45,7 @@ export function ProfileSettings({
         <ConnectedAccounts
           google={connectedProviders.has("google")}
           github={connectedProviders.has("github")}
+          tonWallet={!!user.walletAddress} 
         />
       </SettingsSection>
 
@@ -98,10 +58,7 @@ export function ProfileSettings({
           description={t("deleteAccountDesc")}
           destructive
         >
-          <DeleteAccountDialog
-            hasPassword={userHasPassword}
-            twoFactorEnabled={user.twoFactorEnabled}
-          />
+          <DeleteAccountDialog />
         </SettingsRow>
       </SettingsSection>
     </div>
