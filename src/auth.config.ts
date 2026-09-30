@@ -31,12 +31,10 @@ export function checkAuthorization({
     return Response.redirect(new URL(`/${locale}/dashboard`, origin));
   }
 
-  // 2. Админ-зона
   if (pathname.startsWith("/admin") && role !== "ADMIN") {
     return Response.redirect(new URL(`/${locale}`, origin));
   }
 
-  // 3. Неавторизованный на защищённом маршруте → главная
   const isPublicRoute = PUBLIC_ROUTES.some((route) =>
     pathname === route || pathname.startsWith(`${route}/`)
   );

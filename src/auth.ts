@@ -8,7 +8,7 @@ import { prisma } from "@/shared/server/db/prisma";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { authConfig } from "@/auth.config";
 import { generateUniqueUsername } from "@/entities/user/lib/generate-username";
-import { verifyTonSignature } from "@/shared/server/auth/crypto";
+import { verifyTonProof } from "./shared/server/auth/crypto";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -47,33 +47,30 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       name: "TON Connect",
       credentials: {
         address: { label: "Address", type: "text" },
-        signature: { label: "Signature", type: "text" },
-        nonce: { label: "Nonce", type: "text" },
         publicKey: { label: "Public Key", type: "text" },
+        proof: { label: "Proof", type: "text" },
       },
       async authorize(credentials) {
         const parsed = z
           .object({
             address: z.string().min(1),
-            signature: z.string().min(1),
-            nonce: z.string().min(1),
             publicKey: z.string().min(1),
+            proof: z.string().min(1),
           })
-          .safeParse(credentials);
+          .safeParse(credentials)
 
         if (!parsed.success) {
-          throw new Error("INVALID_CREDENTIALS_FORMAT");
+          throw new Error("INVALID_CREDENTIALS_FORMAT")
         }
 
-        const isValid = await verifyTonSignature(
+        const isValid = await verifyTonProof(
           parsed.data.address,
-          parsed.data.signature,
-          parsed.data.nonce,
-          parsed.data.publicKey
-        );
+          parsed.data.publicKey,
+          parsed.data.proof
+        )
 
         if (!isValid) {
-          throw new Error("INVALID_SIGNATURE");
+          throw new Error("INVALID_SIGNATURE")
         }
 
         const user = await prisma.user.upsert({
@@ -85,7 +82,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             walletAddress: parsed.data.address,
             role: "USER",
           },
-        });
+        })
 
         return {
           id: user.id,
@@ -95,7 +92,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           name: user.name,
           email: user.email,
           image: user.image,
-        };
+        }
       },
     }),
   ],
