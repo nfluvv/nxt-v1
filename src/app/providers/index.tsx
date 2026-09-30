@@ -13,7 +13,7 @@ export function AppProviders({ children }: PropsWithChildren) {
   return (
     <ThemeProvider>
       <SessionProvider>
-        <TonConnectUIProvider manifestUrl="http://localhost:3000/tonconnect-manifest.json">
+        <TonConnectUIProvider manifestUrl="https://nxtemplate.vercel.app/tonconnect-manifest.json">
           <QueryProvider>
             {children}
 
