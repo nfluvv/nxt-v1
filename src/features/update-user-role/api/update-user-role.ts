@@ -43,7 +43,7 @@ export const updateUserRole = async (
     prisma.roleChangeLog.create({
       data: {
         targetId: userId,
-        targetEmail: target.email,
+        targetEmail: target.email ?? "no-email@system.local",
         changedById: session.user.id,
         fromRole: target.role,
         toRole: role,
