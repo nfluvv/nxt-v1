@@ -1,5 +1,5 @@
-import { signVerify } from '@ton/crypto';
-import { Address } from '@ton/core';
+import { signVerify } from '@ton/crypto'
+import { Address } from '@ton/core'
 
 export async function verifyTonSignature(
   address: string,
@@ -8,15 +8,33 @@ export async function verifyTonSignature(
   publicKey: string
 ): Promise<boolean> {
   try {
-    Address.parse(address);
+    Address.parse(address)
+
+    const cleanPublicKey = publicKey.replace(/^0x/, '')
+
+    const messageBuffer = Buffer.from(nonce, 'utf-8')
+
+    const signatureBuffer = Buffer.from(signature, 'base64')
+    const publicKeyBuffer = Buffer.from(cleanPublicKey, 'hex')
+
+    if (publicKeyBuffer.length !== 32) {
+      console.error(`[TON Auth] Ошибка: неверная длина публичного ключа: ${publicKeyBuffer.length} байт (ожидается 32)`)
+      return false
+    }
+
+    const isValid = signVerify(messageBuffer, signatureBuffer, publicKeyBuffer)
     
-    const message = Buffer.from(nonce, 'utf-8');
-    const signatureBuffer = Buffer.from(signature, 'base64url');
-    const publicKeyBuffer = Buffer.from(publicKey, 'hex');
-    
-    return signVerify(message, signatureBuffer, publicKeyBuffer);
+    if (!isValid) {
+      console.error(`[TON Auth] Верификация подписи не пройдена!`)
+      console.error(`- Address: ${address}`)
+      console.error(`- Nonce: ${nonce}`)
+      console.error(`- PubKey (first 10 chars): ${cleanPublicKey.substring(0, 10)}...`)
+      console.error(`- Signature (first 10 chars): ${signature.substring(0, 10)}...`)
+    }
+
+    return isValid
   } catch (error) {
-    console.error('[TON Crypto] Signature verification error:', error);
-    return false;
+    console.error('[TON Auth] Критическая ошибка при верификации:', error)
+    return false
   }
 }
