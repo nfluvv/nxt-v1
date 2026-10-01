@@ -10,7 +10,7 @@ export function createTonPayload() {
   const nonce = randomBytes(16).toString("hex");
   const exp = Math.floor(Date.now() / 1000) + TTL_SEC;
   const data = `${nonce}.${exp}`;
-  return `${data}.${sign(data)}`; // ~76 байт
+  return `${data}.${sign(data)}`;
 }
 
 export function verifyTonPayload(payload: string) {
