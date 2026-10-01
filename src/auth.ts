@@ -2,7 +2,6 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
-import { z } from "zod";
 
 import { prisma } from "@/shared/server/db/prisma";
 import { PrismaAdapter } from "@auth/prisma-adapter";
@@ -25,7 +24,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           name: profile.name ?? profile.login,
           email: profile.email,
           image: profile.avatar_url,
-          walletAddress: null, // Явно указываем null для OAuth-пользователей
+          walletAddress: null,
         };
       },
     }),
