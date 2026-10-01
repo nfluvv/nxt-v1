@@ -1,100 +1,99 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useTonConnectUI, useTonWallet } from "@tonconnect/ui-react"
-import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { toast } from "react-hot-toast"
-import { Wallet, Loader2 } from "lucide-react"
-import { Button } from "@/shared/client/ui"
-import { useTranslations } from "next-intl"
+import { useEffect, useState } from "react";
+import { TonConnectUI } from "@tonconnect/ui";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import { useTranslations } from "next-intl";
+
+import { Button } from "@/shared/client/ui";
+import { generateTonAuthMessage } from "@/entities/wallet/api/generate-ton-message";
+
+const manifestUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/tonconnect-manifest.json`;
 
 export function TonConnectAuthButton() {
-  const [tonConnectUI, setOptions] = useTonConnectUI()
-  const wallet = useTonWallet()
-  const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
-  const t = useTranslations("Auth")
-
-  const [proofPayload, setProofPayload] = useState<string | null>(null)
+  const t = useTranslations("Auth");
+  const router = useRouter();
+  const [tonConnectUI, setTonConnectUI] = useState<TonConnectUI | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const payload = globalThis.crypto.randomUUID()
-    setProofPayload(payload)
+    const tonConnect = new TonConnectUI({
+      manifestUrl,
+    });
+    setTonConnectUI(tonConnect);
 
-    tonConnectUI.setConnectRequestParameters({
-      state: "ready",
-      value: { tonProof: payload },
-    })
-  }, [tonConnectUI])
+    const unsubscribe = tonConnect.onStatusChange((wallet) => {
+      if (wallet) {
+        handleWalletConnected(wallet.account.address);
+      }
+    });
 
-  const handleLogin = async () => {
-    if (!proofPayload) {
-      toast.error("Proof payload not ready")
-      return
-    }
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
+  async function handleWalletConnected(walletAddress: string) {
+    if (!tonConnectUI) return;
+
+    setIsLoading(true);
     try {
-      setIsLoading(true)
+      const { message, nonce, timestamp } = await generateTonAuthMessage(
+        walletAddress
+      );
 
-      const newPayload = globalThis.crypto.randomUUID()
-      tonConnectUI.setConnectRequestParameters({
-        state: "ready",
-        value: { tonProof: newPayload },
-      })
+      const result = await tonConnectUI.sendTransaction({
+        validUntil: Math.floor(Date.now() / 1000) + 600,
+        messages: [
+          {
+            address: walletAddress,
+            amount: "0",
+            payload: Buffer.from(message, "utf-8").toString("hex"),
+          },
+        ],
+      });
 
-      const connectedWallet = await tonConnectUI.connectWallet()
+      const signature = result.boc;
 
-      if (!connectedWallet?.account?.address) {
-        console.log("Connection canceled")
-        return
-      }
-
-      const tonProof = connectedWallet.connectItems?.tonProof
-      
-      if (!tonProof || !("proof" in tonProof)) {
-        toast.error("Wallet does not support ton-proof")
-        return
-      }
-
-      const { proof } = tonProof
-
-      const res = await signIn("ton-connect", {
-        address: connectedWallet.account.address,
-        publicKey: connectedWallet.account.publicKey,
-        proof: JSON.stringify(proof),
+      const signInResult = await signIn("ton-wallet", {
+        walletAddress,
+        signature,
+        nonce,
+        timestamp,
         redirect: false,
-      })
+      });
 
-      if (res?.error) {
-        throw new Error(res.error)
+      if (signInResult?.ok) {
+        router.push("/dashboard");
+      } else {
+        console.error("Sign in failed:", signInResult?.error);
       }
-
-      toast.success(t("successLogin") || "Успешный вход")
-      router.push("/dashboard")
-      router.refresh()
     } catch (error) {
-      console.error("Login error:", error)
-      toast.error(t("tonSignInError") || "Ошибка входа через TON")
+      console.error("Auth error:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
+    }
+  }
+
+  async function handleConnect() {
+    if (!tonConnectUI) return;
+    
+    try {
+      await tonConnectUI.connectWallet();
+    } catch (error) {
+      console.error("Connection error:", error);
     }
   }
 
   return (
     <Button
-      type="button"
-      variant="outline"
+      onClick={handleConnect}
+      disabled={isLoading}
       className="w-full"
-      onClick={handleLogin}
-      disabled={isLoading || !proofPayload}
+      variant="outline"
     >
-      {isLoading ? (
-        <Loader2 className="mr-2 size-4 animate-spin" />
-      ) : (
-        <Wallet className="mr-2 size-4" />
-      )}
-      {wallet ? t("signInWithTon") || "Войти через TON" : t("connectTonWallet") || "Подключить TON кошелёк"}
+      {isLoading ? t("signing") : t("connectTonWallet")}
     </Button>
-  )
+  );
 }

@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl"
 import { GitHubIcon, GoogleIcon } from "@/shared/client/ui"
 
 import { LinkProviderButton,  } from "@/features/manage-oauth"
-import { LinkTonWalletButton, UnlinkTonWalletButton } from "@/features/connect-wallet"
+// import { LinkTonWalletButton, UnlinkTonWalletButton } from "@/features/connect-wallet"
 
 type Provider = "google" | "github"
 
@@ -72,12 +72,12 @@ export function ConnectedAccounts({ google, github, tonWallet }: ConnectedAccoun
             </p>
           </div>
         </div>
-
+{/* 
         {tonWallet ? (
           <UnlinkTonWalletButton />
         ) : (
           <LinkTonWalletButton />
-        )}
+        )} */}
       </div>
     </div>
   )

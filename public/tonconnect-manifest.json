@@ -1,5 +1,7 @@
 {
-  "url": "https://nxtemplate.vercel.app/",
-  "name": "NXT v2",
-  "iconUrl": "https://ton.org/download/ton_symbol.png"
+  "url": "https://nxtemplate.vercel.app",
+  "name": "Nxt",
+  "description": "Production ready template",
+  "verificationUrl": "https://nxtemplate.vercel.app/ton-proof",
+  "iconUrl": "https://nxtemplate.vercel.app/logo.svg"
 }

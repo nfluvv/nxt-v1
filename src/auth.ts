@@ -8,7 +8,14 @@ import { prisma } from "@/shared/server/db/prisma";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { authConfig } from "@/auth.config";
 import { generateUniqueUsername } from "@/entities/user/lib/generate-username";
-import { verifyTonProof } from "./shared/server/auth/crypto";
+import { verifyTonProof } from "@/entities/wallet/api/generate-ton-message";
+
+const TonCredentialsSchema = z.object({
+  walletAddress: z.string().min(48),
+  signature: z.string(),
+  nonce: z.string(),
+  timestamp: z.number(),
+});
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -24,7 +31,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           name: profile.name ?? profile.login,
           email: profile.email,
           image: profile.avatar_url,
-          walletAddress: null, // Явно указываем null для OAuth-пользователей
+          walletAddress: null,
         };
       },
     }),
@@ -43,55 +50,59 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
     Credentials({
-      id: "ton-connect",
-      name: "TON Connect",
+      id: "ton-wallet",
+      name: "TON Wallet",
       credentials: {
-        address: { label: "Address", type: "text" },
-        publicKey: { label: "Public Key", type: "text" },
-        proof: { label: "Proof", type: "text" },
+        walletAddress: { label: "Wallet Address", type: "text" },
+        signature: { label: "Signature", type: "text" },
+        nonce: { label: "Nonce", type: "text" },
+        timestamp: { label: "Timestamp", type: "number" },
       },
       async authorize(credentials) {
-        const parsed = z
-          .object({
-            address: z.string().min(1),
-            publicKey: z.string().min(1),
-            proof: z.string().min(1),
-          })
-          .safeParse(credentials)
+        if (!credentials) return null;
 
-        if (!parsed.success) {
-          throw new Error("INVALID_CREDENTIALS_FORMAT")
-        }
+        try {
+          const parsed = TonCredentialsSchema.parse(credentials);
+          
+          await verifyTonProof(
+            parsed.walletAddress,
+            parsed.signature,
+            parsed.nonce,
+            parsed.timestamp
+          );
 
-        const isValid = await verifyTonProof(
-          parsed.data.address,
-          parsed.data.publicKey,
-          parsed.data.proof
-        )
+          let user = await prisma.user.findUnique({
+            where: { walletAddress: parsed.walletAddress },
+          });
 
-        if (!isValid) {
-          throw new Error("INVALID_SIGNATURE")
-        }
+          if (!user) {
+            user = await prisma.user.create({
+              data: {
+                walletAddress: parsed.walletAddress,
+                username: await generateUniqueUsername(
+                  parsed.walletAddress.slice(0, 10)
+                ),
+              },
+            });
+          } else if (!user.walletVerifiedAt) {
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { walletVerifiedAt: new Date() },
+            });
+          }
 
-        const user = await prisma.user.upsert({
-          where: { walletAddress: parsed.data.address },
-          update: {
-            updatedAt: new Date(),
-          },
-          create: {
-            walletAddress: parsed.data.address,
-            role: "USER",
-          },
-        })
-
-        return {
-          id: user.id,
-          role: user.role,
-          walletAddress: user.walletAddress,
-          username: user.username,
-          name: user.name,
-          email: user.email,
-          image: user.image,
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            image: user.image,
+            walletAddress: user.walletAddress,
+            username: user.username,
+            role: user.role,
+          };
+        } catch (error) {
+          console.error("TON auth error:", error);
+          return null;
         }
       },
     }),
@@ -103,8 +114,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       const seed =
         user.email?.split("@")[0] ??
         user.name ??
-        (user.walletAddress ? user.walletAddress.slice(2, 10) : "web3_user");
-      
+        (user.walletAddress ? user.walletAddress.slice(0, 10) : "web3_user");
+
       const username = await generateUniqueUsername(seed);
 
       await prisma.user.update({
@@ -117,63 +128,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
   callbacks: {
-    ...authConfig.callbacks,
-    async signIn({ account, profile }) {
-      if (account?.provider === "google" || account?.provider === "github") {
-        const session = await auth();
-        
-        if (session?.user?.id) {
-          const existingAccount = await prisma.account.findUnique({
-            where: {
-              provider_providerAccountId: {
-                provider: account.provider,
-                providerAccountId: account.providerAccountId,
-              },
-            },
-            select: { userId: true },
-          });
-
-          if (existingAccount && existingAccount.userId !== session.user.id) {
-            return `/login?error=AccountAlreadyLinked`;
-          }
-
-          await prisma.account.create({
-            data: {
-              userId: session.user.id,
-              type: account.type,
-              provider: account.provider,
-              providerAccountId: account.providerAccountId,
-              refresh_token: account.refresh_token ?? null,
-              access_token: account.access_token ?? null,
-              expires_at: account.expires_at ?? null,
-              token_type: account.token_type ?? null,
-              scope: account.scope ?? null,
-              id_token: account.id_token ?? null,
-              // Явное приведение типа, чтобы Prisma не ругался на JsonValue
-              session_state: account.session_state ? String(account.session_state) : null,
-            },
-          });
-
-          // Безопасное обновление без spread-операторов, которые ломают TS
-          if (profile) {
-            const updateData: Record<string, string> = {};
-            if ("email" in profile && profile.email) updateData.email = String(profile.email);
-            if ("image" in profile && profile.image) updateData.image = String(profile.image);
-
-            if (Object.keys(updateData).length > 0) {
-              await prisma.user.update({
-                where: { id: session.user.id },
-                data: updateData,
-              });
-            }
-          }
-
-          return true;
-        }
-      }
-      return true;
-    },
-
+    // ... твои существующие callbacks...
     jwt: async ({ token, user, trigger }) => {
       if (user?.id) {
         token.id = user.id;
@@ -204,7 +159,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return token;
     },
-
     session: ({ session, token }) => {
       if (session.user) {
         session.user.id = token.id as string;

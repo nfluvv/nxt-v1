@@ -15,7 +15,8 @@ model User {
   image         String?
   role          Role      @default(USER)
 
-  walletAddress String?   @unique // Tonkeeper adress
+  walletAddress String?   @unique
+  walletVerifiedAt DateTime?
 
   accounts Account[]
 

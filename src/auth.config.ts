@@ -1,7 +1,7 @@
 import type { NextAuthConfig } from "next-auth";
 
 const PUBLIC_ROUTES = [
-  "/",           // ← ВОТ ЭТА СТРОКА. Без неё бесконечный редирект.
+  "/",
   "/login",
   "/register",
   "/forbidden",
