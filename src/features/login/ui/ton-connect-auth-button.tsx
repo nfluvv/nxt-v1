@@ -1,99 +1,48 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { TonConnectUI } from "@tonconnect/ui";
-import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { signIn } from "next-auth/react";
-import { useTranslations } from "next-intl";
-
-import { Button } from "@/shared/client/ui";
-import { generateTonAuthMessage } from "@/entities/wallet/api/generate-ton-message";
-
-const manifestUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/tonconnect-manifest.json`;
+import { useTonConnectUI } from "@tonconnect/ui-react";
+import { Wallet } from "lucide-react";
 
 export function TonConnectAuthButton() {
-  const t = useTranslations("Auth");
-  const router = useRouter();
-  const [tonConnectUI, setTonConnectUI] = useState<TonConnectUI | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [tonConnectUI] = useTonConnectUI();
+
 
   useEffect(() => {
-    const tonConnect = new TonConnectUI({
-      manifestUrl,
-    });
-    setTonConnectUI(tonConnect);
-
-    const unsubscribe = tonConnect.onStatusChange((wallet) => {
-      if (wallet) {
-        handleWalletConnected(wallet.account.address);
-      }
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, []);
-
-  async function handleWalletConnected(walletAddress: string) {
-    if (!tonConnectUI) return;
-
-    setIsLoading(true);
-    try {
-      const { message, nonce, timestamp } = await generateTonAuthMessage(
-        walletAddress
+    tonConnectUI.setConnectRequestParameters({ state: "loading" });
+    fetch("/api/ton/payload")
+      .then((r) => r.json())
+      .then(({ payload }) =>
+        tonConnectUI.setConnectRequestParameters({ state: "ready", value: { tonProof: payload } }),
       );
+  }, [tonConnectUI]);
 
-      const result = await tonConnectUI.sendTransaction({
-        validUntil: Math.floor(Date.now() / 1000) + 600,
-        messages: [
-          {
-            address: walletAddress,
-            amount: "0",
-            payload: Buffer.from(message, "utf-8").toString("hex"),
-          },
-        ],
-      });
+  useEffect(
+    () =>
+      tonConnectUI.onStatusChange(async (wallet) => {
+        const item = wallet?.connectItems?.tonProof;
+        if (!wallet || !item || !("proof" in item)) return;
 
-      const signature = result.boc;
+        await signIn("ton", {
+          address: wallet.account.address,
+          publicKey: wallet.account.publicKey,
+          stateInit: wallet.account.walletStateInit,
+          proof: JSON.stringify(item.proof),
+          redirectTo: "/dashboard",
+        });
+      }),
+    [tonConnectUI],
+  );
 
-      const signInResult = await signIn("ton-wallet", {
-        walletAddress,
-        signature,
-        nonce,
-        timestamp,
-        redirect: false,
-      });
-
-      if (signInResult?.ok) {
-        router.push("/dashboard");
-      } else {
-        console.error("Sign in failed:", signInResult?.error);
-      }
-    } catch (error) {
-      console.error("Auth error:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function handleConnect() {
-    if (!tonConnectUI) return;
-    
-    try {
-      await tonConnectUI.connectWallet();
-    } catch (error) {
-      console.error("Connection error:", error);
-    }
-  }
+  const onClick = async () => {
+    if (tonConnectUI.connected) await tonConnectUI.disconnect();
+    await tonConnectUI.openModal();
+  };
 
   return (
-    <Button
-      onClick={handleConnect}
-      disabled={isLoading}
-      className="w-full"
-      variant="outline"
-    >
-      {isLoading ? t("signing") : t("connectTonWallet")}
-    </Button>
+    <button onClick={onClick} className="...">
+      <Wallet className="size-4" /> TON Wallet
+    </button>
   );
 }

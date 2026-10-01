@@ -203,7 +203,14 @@
     "unlinkPending": "Отвязываем...",
     "unlinkTitle": "Отвязать {provider}?",
     "unlinkDescription": "Вы больше не сможете входить через {provider}. Убедитесь, что у вас остаётся другой способ входа.",
-    "unlinkSuccess": "{provider} отвязан"
+    "unlinkSuccess": "{provider} отвязан",
+    "linkSuccess": "{provider} привязан",
+    "tonErrors": {
+      "unauthorized": "Необходимо войти в аккаунт",
+      "invalidProof": "Не удалось подтвердить владение кошельком",
+      "walletAlreadyLinked": "Этот кошелёк уже привязан к другому аккаунту",
+      "lastLoginMethod": "Нельзя отвязать единственный способ входа"
+    }
   },
 
   "avatarUploader": {

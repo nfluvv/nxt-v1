@@ -203,7 +203,14 @@
     "unlinkPending": "Disconnecting...",
     "unlinkTitle": "Disconnect {provider}?",
     "unlinkDescription": "You will no longer be able to sign in through {provider}. Make sure you have another way to sign in.",
-    "unlinkSuccess": "{provider} disconnected"
+    "unlinkSuccess": "{provider} disconnected",
+    "linkSuccess": "{provider} linked successfully", 
+  "tonErrors": { 
+    "unauthorized": "Authorization required", 
+    "invalidProof": "Failed to verify wallet ownership", 
+    "walletAlreadyLinked": "This wallet is already linked to another account", 
+    "lastLoginMethod": "Cannot unlink the only available login method" 
+  }
   },
 
   "avatarUploader": {

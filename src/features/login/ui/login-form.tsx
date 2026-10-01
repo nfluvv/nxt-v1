@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl"
 import { OAuthButtons } from "./oauth-buttons"
-import { TonConnectAuthButton } from "./ton-connect-auth-button"
+import { TonConnectAuthButton } from "./ton-connect-auth-button" 
 
 export function LoginForm() {
   const t = useTranslations("Auth")
