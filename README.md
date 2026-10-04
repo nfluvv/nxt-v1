@@ -36,7 +36,6 @@ This is not just another basic login boilerplate. It is an enterprise-grade foun
 - **Primitives Kit:** shadcn/ui + Radix UI Primitives
 - **Styling Architecture:** Tailwind CSS 4 (Next-gen compiler)
 - **Media Asset Storage:** Cloudinary CDN
-- **Transactional Mailer:** Resend API
 - **Test Automation:** Vitest environment
 - **CI/CD Pipeline:** GitHub Actions automation workflow
 
@@ -46,8 +45,8 @@ This is not just another basic login boilerplate. It is an enterprise-grade foun
 
 #### 1. Clone the Architecture
 ```bash
-git clone https://github.com/nfluvv/nxt-template.git
-cd nxt-template
+git clone https://github.com/nfluvv/nxt-v1.git
+cd nxt-v1
 ```
 
 #### 2. Bootstrap Package Workspace
