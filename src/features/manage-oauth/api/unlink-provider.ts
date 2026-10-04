@@ -11,28 +11,26 @@ export const unlinkProvider = async (
 ): Promise<UnlinkResult> => {
   const session = await auth()
   if (!session?.user?.id) {
-    return { success: false, error: "Не авторизован" }
+    return { success: false, error: "Unauthorized" }
   }
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
     select: {
-      walletAddress: true, // Проверяем наличие Web3 входа
       accounts: { select: { provider: true } },
     },
   })
 
   if (!user) {
-    return { success: false, error: "Пользователь не найден" }
+    return { success: false, error: "User not found" }
   }
 
   const otherOAuthAccounts = user.accounts.filter((a) => a.provider !== provider)
-  const hasOtherLoginMethod = Boolean(user.walletAddress) || otherOAuthAccounts.length > 0
 
-  if (!hasOtherLoginMethod) {
+  if (!otherOAuthAccounts) {
     return {
       success: false,
-      error: "Невозможно отключить единственный способ входа в аккаунт",
+      error: "Cannot disconnect the only login method for the account",
     }
   }
 

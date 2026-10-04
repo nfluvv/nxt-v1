@@ -8,6 +8,5 @@ export type User = {
   image: string | null;
   username: string | null;
   role: "USER" | "ADMIN";
-  walletAddress: string | null;
   accounts: { provider: string }[];
 };
