@@ -1,5 +1,5 @@
 export const siteConfig = {
-  name: "Nxt template v2",
+  name: "Nxtemplate",
   description: "Next.js FSD Template",
   routes: {
     home: "/",

@@ -3,13 +3,10 @@ import type { NextAuthConfig } from "next-auth";
 const PUBLIC_ROUTES = [
   "/",
   "/login",
-  "/register",
   "/forbidden",
-  "/verify-email",
-  "/forgot-password",
+  "/about",
+  "/pricing",
   "/u",
-  "/reset-password",
-  "/confirm-email-change",
 ];
 
 type CheckAuthorizationParams = {

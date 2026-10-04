@@ -19,7 +19,6 @@ export const getCurrentUser = cache(async () => {
       image: true,
       username: true,
       role: true,
-      walletAddress: true,
       accounts: {
         select: { provider: true }
       }

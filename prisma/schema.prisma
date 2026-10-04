@@ -15,9 +15,6 @@ model User {
   image         String?
   role          Role      @default(USER)
 
-  walletAddress String?   @unique
-  walletVerifiedAt DateTime?
-
   accounts Account[]
 
   createdAt DateTime @default(now())
@@ -67,7 +64,6 @@ model RateLimitAttempt {
   @@index([identifier, createdAt])
   @@map("rate_limit_attempts")
 }
-
 
 enum Role {
   USER

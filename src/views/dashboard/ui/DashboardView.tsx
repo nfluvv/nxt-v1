@@ -1,15 +1,16 @@
 import { Container } from "@/shared/client/ui"
-import { WalletBalance } from "@/entities/wallet/server";
-import { Suspense } from "react";
+import { getTranslations } from "next-intl/server";
 
-export function DashboardView() {
+export async function DashboardView() {
+  const t = await getTranslations("dashboard")
+
   return (
-    <main className="py-4">
+    <main className="py-2">
       <Container>
-        <h1 className="text-3xl font-black">Dashboard</h1>
-        <Suspense fallback={<span className="inline-block h-4 w-16 animate-pulse rounded bg-muted" />}>
-          <WalletBalance />
-        </Suspense>
+        <div>
+          <h1 className="text-3xl font-black">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("decription")}</p>
+        </div>
       </Container>
     </main>
   )

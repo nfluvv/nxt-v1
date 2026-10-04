@@ -7,22 +7,35 @@ import { siteConfig } from "@/shared/client/config/site"
 import { buttonVariants, Container } from "@/shared/client/ui"
 import { getTranslations } from "next-intl/server"
 import { UserMenu } from "./UserMenu"
+import { DesktopNav, MobileNav, type NavItem } from "./HeaderNav"
 
 export async function Header() {
   const user = await getCurrentUser()
   const t = await getTranslations("Auth")
+  const tNav = await getTranslations("Nav")
+
+  const navItems: NavItem[] = [
+    { href: "/", label: tNav("home") },
+    { href: "/pricing", label: tNav("pricing") },
+    { href: "/about", label: tNav("about") },
+  ]
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-sm">
-      <Container className="flex flex-wrap items-center justify-between gap-1.5 gap-x-4 gap-y-2 py-2.5 sm:h-16 sm:py-0">
-        <Link
-          href={siteConfig.routes.home}
-          className="font-display shrink-0 text-base font-semibold sm:text-lg"
-        >
-          {siteConfig.name}
-        </Link>
+      <Container className="grid h-14 grid-cols-[auto_1fr] items-center gap-x-4 sm:h-16 md:grid-cols-[1fr_auto_1fr]">
+        <div>
+          <Link
+            href={siteConfig.routes.home}
+            className="font-display shrink-0 text-base font-semibold sm:text-lg"
+          >
+            {siteConfig.name}
+          </Link>
+        </div>
 
-        <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+
+        <DesktopNav items={navItems} />
+
+        <div className="flex items-center justify-self-end gap-1 sm:gap-2">
           <ThemeToggle />
           <LanguageSwitcher />
 
@@ -31,15 +44,15 @@ export async function Header() {
           {user ? (
             <UserMenu user={user} />
           ) : (
-            <div className="flex flex-wrap items-center gap-1 sm:gap-2">
-              <Link
-                href={siteConfig.routes.login}
-                className={buttonVariants({ variant: "ghost", size: "sm" })}
-              >
-                {t("login")}
-              </Link>
-            </div>
+            <Link
+              href={siteConfig.routes.login}
+              className={buttonVariants({ variant: "ghost", size: "sm" })}
+            >
+              {t("login")}
+            </Link>
           )}
+
+          <MobileNav items={navItems} label={tNav("menu")} />
         </div>
       </Container>
     </header>

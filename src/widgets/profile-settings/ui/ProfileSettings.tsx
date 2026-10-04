@@ -45,7 +45,6 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
         <ConnectedAccounts
           google={connectedProviders.has("google")}
           github={connectedProviders.has("github")}
-          tonWallet={!!user.walletAddress} 
         />
       </SettingsSection>
 

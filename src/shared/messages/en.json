@@ -12,6 +12,28 @@
     "active": "Active"
   },
 
+  "Nav": {
+    "home": "Home",
+    "pricing": "Pricing",
+    "about": "About",
+    "menu": "Menu"
+  },
+
+  "dashboard": {
+    "title": "Dashboard",
+    "decription": "Welcome to your dashboard!"
+  },
+
+  "pricing": {
+    "title": "Pricing",
+    "description": "Here you can view our pricing plans and choose the one that best fits your needs."
+  },
+
+  "about": {
+    "title": "About Us",
+    "description": "Learn more about our company and what we do."
+  },
+
   "loginForm": {
     "successLogin": "Signed in successfully",
     "invalidCredentials": "Incorrect email or password",
