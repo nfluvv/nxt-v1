@@ -1,4 +1,4 @@
-# 💎 Nxtemplate — Production-Ready OAuth Starter
+# 💎 Nxtemplate — OAuth Starter
 
 A battle-tested, high-performance authentication ecosystem built with **Next.js 16 (App Router)**, **Auth.js v5**, **Prisma ORM**, **PostgreSQL**, and structured around **Feature-Sliced Design (FSD)**.
 
