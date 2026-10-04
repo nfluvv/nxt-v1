@@ -36,6 +36,7 @@ This is not just another basic login boilerplate. It is an enterprise-grade foun
 - **Primitives Kit:** shadcn/ui + Radix UI Primitives
 - **Styling Architecture:** Tailwind CSS 4 (Next-gen compiler)
 - **Media Asset Storage:** Cloudinary CDN
+- **Transactional Mailer:** Resend API
 - **Test Automation:** Vitest environment
 - **CI/CD Pipeline:** GitHub Actions automation workflow
 
