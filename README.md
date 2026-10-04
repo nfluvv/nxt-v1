@@ -4,7 +4,7 @@ A battle-tested, high-performance authentication ecosystem built with **Next.js 
 
 This is not just another basic login boilerplate. It is an enterprise-grade foundation engineered for security, modularity, and rapid product delivery. Credentials logic has been stripped out to enforce secure, modern OAuth workflows, combined with a hardened security stack.
 
-**[🚀 Live Demo]()**
+**[🚀 Live Demo](https://nxtemplate.vercel.app)**
 
 ---
 
