@@ -1,5 +1,14 @@
 import { Container } from "@/shared/client/ui"
 import { getTranslations } from "next-intl/server"
+import { Metadata } from "next"
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta")
+
+  return {
+    title: t("pricingTitle"),
+  }
+}
 
 export default async function PricingPage() {
   const t = await getTranslations("pricing")

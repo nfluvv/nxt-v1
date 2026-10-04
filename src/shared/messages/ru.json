@@ -83,7 +83,10 @@
     "loginTitle": "Вход",
     "registerTitle": "Регистрация",
     "resetPasswordTitle": "Сброс пароля",
-    "userNotFound": "Пользователь не найден"
+    "userNotFound": "Пользователь не найден",
+    "pricingTitle": "Цены",
+    "aboutTitle": "О нас",
+    "dashboardTitle": "Дашборд"
   },
 
 

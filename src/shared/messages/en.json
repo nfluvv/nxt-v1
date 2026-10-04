@@ -83,9 +83,11 @@
     "loginTitle": "Log in",
     "registerTitle": "Sign up",
     "resetPasswordTitle": "Reset password",
-    "userNotFound": "Uset not found"
+    "userNotFound": "User not found",
+    "pricingTitle": "Pricing",
+    "aboutTitle": "About",
+    "dashboardTitle": "Dashboard"
   },
-
 
   "Auth": {
     "login": "Log in",
