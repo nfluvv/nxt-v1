@@ -12,7 +12,7 @@ export default async function AuthLayout({
 
   if (session?.user) {
     const user = await getCurrentUser()
-    redirect(user?.username ? `/users/${user.username}` : "/settings")
+    redirect(user?.username ? `/u/${user.username}` : "/settings")
   }
 
   return <>{children}</>

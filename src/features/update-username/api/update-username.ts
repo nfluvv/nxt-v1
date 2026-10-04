@@ -50,7 +50,7 @@ export const updateUsername = async (
   })
 
   revalidatePath("/settings")
-  revalidatePath(`/users/${username}`)
+  revalidatePath(`/u/${username}`)
 
   return { success: true }
 }

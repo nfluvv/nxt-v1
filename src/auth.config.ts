@@ -7,7 +7,7 @@ const PUBLIC_ROUTES = [
   "/forbidden",
   "/verify-email",
   "/forgot-password",
-  "/users",
+  "/u",
   "/reset-password",
   "/confirm-email-change",
 ];
