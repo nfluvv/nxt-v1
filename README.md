@@ -1,131 +1,236 @@
-# 💎 Nxtemplate — OAuth Starter
+<h1 align="center">💎 Nxt v1</h1>
 
-A battle-tested, high-performance authentication ecosystem built with **Next.js 16 (App Router)**, **Auth.js v5**, **Prisma ORM**, **PostgreSQL**, and structured around **Feature-Sliced Design (FSD)**.
+<p align="center">
+A production-ready <b>OAuth</b> starter built with <b>Next.js 16</b>, <b>Auth.js v5</b>, <b>Prisma</b>, <b>PostgreSQL</b>, and <b>Feature-Sliced Design (FSD)</b>.
+</p>
 
-This is not just another basic login boilerplate. It is an enterprise-grade foundation engineered for security, modularity, and rapid product delivery. Credentials logic has been stripped out to enforce secure, modern OAuth workflows, combined with a hardened security stack.
-
-**[🚀 Live Demo](https://nxtemplate.vercel.app)**
-
----
-
-### 👾 Engineered Features
-
-- **Pure OAuth Authentication** — Seamless integration with Google and GitHub providers out of the box.
-- **Robust FSD Architecture** — Strict layer boundaries enforced via ESLint, ensuring zero spaghetti code and decoupling feature components.
-- **Enterprise-Grade Admin Panel** — Built-in server-side user management, fast cursor pagination, structural search, role management, and immutable audit logging.
-- **Infrastructure-Free Rate Limiting** — PostgreSQL-backed token-bucket rate limiting to mitigate brute-force and DDoS vectors without Redis dependencies.
-- **Bulletproof Account Linking** — Secure OAuth account merging mechanisms completely hardened against sophisticated account-takeover scenarios.
-- **Advanced Profile Management** — Dynamic username/display name modification, dynamic email routing, password control, and persistent sessions.
-- **Signed Cloudinary Uploads** — Secure, client-side verified avatar uploads utilizing signed cryptographic tokens.
-- **Dual-Layer Language Switching** — Native internationalization architecture support (English + Русский).
-- **Responsive UI Evolution** — Premium fluid layout crafted with React 19, Tailwind CSS 4, and fully customizable shadcn/ui components.
-- **Persistent Theme System** — Synchronized Dark, Light, and System theme persistence.
+<p align="center">
+<a href="https://nxtemplate.vercel.app"><b>🚀 Live Demo</b></a>
+</p>
 
 ---
 
-### 🔥 Technical Stack
+> [!NOTE]
+> This is more than a basic login template. It is a strong base for fast product work, with a focus on security and clean modules. Password login is removed on purpose, so the app uses only safe, modern OAuth.
 
-- **Framework:** Next.js 16 (App Router)
-- **UI Runtime:** React 19
-- **Security & Auth:** Auth.js / NextAuth.js v5
-- **Database Engine:** PostgreSQL
-- **Data Modeling:** Prisma ORM
-- **Client State:** Zustand
-- **Server State:** TanStack Query v5 (React Query)
-- **Validation Engine:** React Hook Form + Zod validation schemas
-- **Primitives Kit:** shadcn/ui + Radix UI Primitives
-- **Styling Architecture:** Tailwind CSS 4 (Next-gen compiler)
-- **Media Asset Storage:** Cloudinary CDN
-- **Transactional Mailer:** Resend API
-- **Test Automation:** Vitest environment
-- **CI/CD Pipeline:** GitHub Actions automation workflow
+> [!IMPORTANT]
+> The project uses **Feature-Sliced Design (FSD)**. Layer boundaries are checked with **ESLint**, so there is no spaghetti code and features stay independent.
 
 ---
 
-### 🚀 Production Installation
+## 👾 Features
 
-#### 1. Clone the Architecture
+<table>
+  <thead>
+    <tr>
+      <th width="280" align="left">Feature</th>
+      <th align="left">Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td width="280"><b>OAuth Authentication</b></td>
+      <td>Google and GitHub login, ready out of the box.</td>
+    </tr>
+    <tr>
+      <td width="280"><b>FSD Architecture</b></td>
+      <td>Strict layer rules enforced with ESLint.</td>
+    </tr>
+    <tr>
+      <td width="280"><b>Admin Panel</b></td>
+      <td>Server-side user management, cursor pagination, search, roles, and audit log.</td>
+    </tr>
+    <tr>
+      <td width="280"><b>Rate Limiting</b></td>
+      <td>Token-bucket limits stored in PostgreSQL. Protects from brute-force and DDoS. No Redis needed.</td>
+    </tr>
+    <tr>
+      <td width="280"><b>Account Linking</b></td>
+      <td>Safe OAuth account merging with protection from account takeover.</td>
+    </tr>
+    <tr>
+      <td width="280"><b>Profile Management</b></td>
+      <td>Change username, display name, email, and password. Sessions are saved.</td>
+    </tr>
+    <tr>
+      <td width="280"><b>Cloudinary Uploads</b></td>
+      <td>Signed avatar uploads from the client.</td>
+    </tr>
+    <tr>
+      <td width="280"><b>Language Switching</b></td>
+      <td>English and Russian.</td>
+    </tr>
+    <tr>
+      <td width="280"><b>Responsive UI</b></td>
+      <td>Smooth layout built with React 19, Tailwind CSS 4, and shadcn/ui.</td>
+    </tr>
+    <tr>
+      <td width="280"><b>Themes</b></td>
+      <td>Dark, light, and system theme. The choice is saved.</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## 🔥 Tech Stack
+
+<table>
+  <thead>
+    <tr>
+      <th width="220" align="left">Area</th>
+      <th align="left">Tools</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td width="220"><b>Framework</b></td>
+      <td>Next.js 16 (App Router)</td>
+    </tr>
+    <tr>
+      <td width="220"><b>UI</b></td>
+      <td>React 19</td>
+    </tr>
+    <tr>
+      <td width="220"><b>Authentication</b></td>
+      <td>Auth.js / NextAuth.js v5</td>
+    </tr>
+    <tr>
+      <td width="220"><b>Database & ORM</b></td>
+      <td>PostgreSQL, Prisma</td>
+    </tr>
+    <tr>
+      <td width="220"><b>State</b></td>
+      <td>Zustand (client), TanStack Query v5 (server)</td>
+    </tr>
+    <tr>
+      <td width="220"><b>Forms</b></td>
+      <td>React Hook Form + Zod</td>
+    </tr>
+    <tr>
+      <td width="220"><b>UI Components</b></td>
+      <td>shadcn/ui + Radix UI</td>
+    </tr>
+    <tr>
+      <td width="220"><b>Styling</b></td>
+      <td>Tailwind CSS 4</td>
+    </tr>
+    <tr>
+      <td width="220"><b>Services</b></td>
+      <td>Cloudinary (images), Resend (email)</td>
+    </tr>
+    <tr>
+      <td width="220"><b>Testing & CI</b></td>
+      <td>Vitest, GitHub Actions</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## 🚀 Installation
+
+<details>
+<summary><b>Step-by-step guide</b></summary>
+
+<br>
+
+**1. Clone the repository**
+
 ```bash
 git clone https://github.com/nfluvv/nxt-v1.git
 cd nxt-v1
 ```
 
-#### 2. Bootstrap Package Workspace
+**2. Install dependencies**
+
 ```bash
 npm install
 ```
 
-#### 3. Establish Cryptographic & Environment Environment
-Generate your production configuration file:
+**3. Set up environment variables**
+
 ```bash
 cp .env.example .env
 ```
-Open `.env` and fill the variables: database connection pool string, Auth.js deployment secret, Google/GitHub client IDs, and your active Resend/Cloudinary API endpoints.
 
-#### 4. Sync Database Schema & Primitives
-Ensure your PostgreSQL instance is running, then execute:
+Fill in the values in `.env`: database connection string, Auth.js secret, Google and GitHub client IDs, and Resend and Cloudinary keys.
+
+**4. Set up the database**
+
+Make sure PostgreSQL is running, then run:
+
 ```bash
-# Generate type-safe Prisma Client models
 npx prisma generate
-
-# Create and execute the development database migration
 npx prisma migrate dev
 ```
 
-To visually inspect database entries, manage audit logs, or alter user roles manually, boot up the native schema GUI:
-```bash
-npx prisma studio
-```
+**5. Start the dev server**
 
-#### 5. Spin Up Runtime Engine
 ```bash
 npm run dev
 ```
-The boilerplate engine boots up instantly at: `http://localhost:3000`
 
----
+Open the app at `http://localhost:3000`.
 
-### 🛠 Operational Prisma Toolchain
+</details>
+
+<details>
+<summary><b>Useful Prisma commands</b></summary>
+
+<br>
 
 ```bash
-# Force regeneration of type-safe Prisma schemas
+# Generate Prisma Client
 npx prisma generate
 
-# Generate localized migration files and update local DB
+# Create and apply a new migration
 npx prisma migrate dev
 
-# Execute production migrations down the deployment pipeline
+# Apply migrations in production
 npx prisma migrate deploy
 
-# Fire up visual database management dashboard
+# Open Prisma Studio (database viewer)
 npx prisma studio
 
-# Destructive command: Wipes database clean and applies migrations from scratch
+# Reset the database
 npx prisma migrate reset
 ```
-> ⚠️ **Warning:** Running `npx prisma migrate reset` drops all existing tables and truncates data instantly. Never trigger this in staging or production environments.
+
+> [!WARNING]
+> `prisma migrate reset` deletes all tables and data. Never run it in staging or production.
+
+</details>
 
 ---
 
-### 🏗 Architecture & Codebase Topology
+## 🏗 Architecture
 
-The code relies tightly on the **Feature-Sliced Design (FSD)** methodology, eliminating cyclic dependencies and global coupling.
+> [!TIP]
+> Each layer can only import from the layers below it. This avoids cyclic dependencies and keeps the code easy to scale.
+
+<details>
+<summary><b>Project structure</b></summary>
+
+<br>
 
 ```text
 src/
-├── app/          # Global application layout, providers, styles, and configurations
-├── views/        # Structural page-level compositions and main screen layers
-├── widgets/      # High-level compound UI blocks combining features and entities
-├── features/     # Isolated user actions, forms, mutations, and business-focused interactions
-├── entities/     # Decoupled domain models, Prisma queries, validation schemas, and stores
-├── shared/       # Reusable abstraction layer: UI Kit, utility functions, and network drivers
-└── auth.ts       # Core cryptographic Auth.js authentication provider runtime configuration
+├── app/          # Global layout, providers, styles, and config
+├── views/        # Page-level compositions
+├── widgets/      # Large UI blocks that combine features and entities
+├── features/     # User actions, forms, and business logic
+├── entities/     # Domain models, Prisma queries, schemas, and stores
+├── shared/       # UI kit, utilities, and network clients
+└── auth.ts       # Core Auth.js provider configuration
 
-app/              # Next.js physical file-system routing layer (Zero business logic here)
+app/              # Next.js routing layer (no business logic here)
 ```
+
+</details>
 
 ---
 
-### 💰 Core License
+## 💰 License
 
-- Open-source software deployed under the **Apache 2.0 License** by nfluvv. Full legal compliance text is verified in the repository tree.
+Released under the **Apache 2.0 License** by nfluvv. The full text is in the repository.
